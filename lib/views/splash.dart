@@ -26,7 +26,7 @@ class _SplashState extends State<Splash> {
   route() {
     Navigator.of(context).pushReplacementNamed(AppRoute.loginRoute);
   }
-add
+
   @override
   Widget build(BuildContext context) {
     return Container(
