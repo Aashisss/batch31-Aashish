@@ -8,7 +8,7 @@ class Splash extends StatefulWidget {
   @override
   State<Splash> createState() => _SplashState();
 }
-//classs
+
 class _SplashState extends State<Splash> {
   @override
   void initState() {
