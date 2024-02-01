@@ -21,6 +21,7 @@ class _SplashState extends State<Splash> {
     var duration = const Duration(seconds: 2);
     return Timer(duration, route);
   }
+  //route
 
   route() {
     Navigator.of(context).pushReplacementNamed(AppRoute.loginRoute);
