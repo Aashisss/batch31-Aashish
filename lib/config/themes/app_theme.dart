@@ -1,10 +1,10 @@
-import 'package:final_project/config/constants/theme_constant.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_and_api_for_class/config/constants/theme_constant.dart';
 
 class AppTheme {
   AppTheme._();
 
-  static getApplicationTheme({required bool isDark}) {
+  static getApplicationTheme(bool isDark) {
     return ThemeData(
       // colorScheme: const ColorScheme.light(
       //   primary: ThemeConstant.primaryColor,
@@ -19,7 +19,7 @@ class AppTheme {
               primary: Color.fromARGB(255, 17, 119, 20),
             ),
       brightness: isDark ? Brightness.dark : Brightness.light,
-      fontFamily: 'Lato Light',
+      fontFamily: 'Montserrat',
       useMaterial3: true,
 
       // Change app bar color
@@ -33,24 +33,6 @@ class AppTheme {
         ),
       ),
 
-        // Heading font
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        fontFamily:
-            "Montserrat Bold", // Replace with the actual font family name
-        color: Colors.black,
-      ),
-      displayMedium: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.normal,
-        fontFamily: "Lato Bold", // Replace with the actual font family name
-        color: Colors.black,
-      ),
-      // Add more text styles as needed
-    ),
-
       // Change elevated button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -62,7 +44,6 @@ class AppTheme {
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
-            side: const BorderSide(color: Colors.grey),
           ),
         ),
       ),

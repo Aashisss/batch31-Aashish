@@ -1,46 +1,56 @@
 import 'package:equatable/equatable.dart';
+import 'package:hive_and_api_for_class/features/batch/domain/entity/batch_entity.dart';
+import 'package:hive_and_api_for_class/features/course/domain/entity/course_entity.dart';
 
 class AuthEntity extends Equatable {
-  final String? userId;
-  final String firstName;
-  final String lastName;
-  final String email;
+  final String? id;
+  final String fname;
+  final String lname;
+  final String? image;
+  final String phone;
+  final BatchEntity batch;
+  final List<CourseEntity> courses;
+  final String username;
   final String password;
 
-  const AuthEntity(
-      {this.userId,
-      required this.firstName,
-      required this.lastName,
-      required this.email,
-      required this.password});
-
   @override
-  // TODO: implement props
-  List<Object?> get props => [userId, firstName, lastName, email, password];
+  List<Object?> get props =>
+      [id, fname, lname, image, phone, batch, courses, username, password];
 
-  factory AuthEntity.fromJson(Map<String, dynamic> json){
-    return AuthEntity(
-      userId : json['userId'],
-      firstName: json['firstName'] as String,
-      lastName: json['lastName'] as String,
-      email: json['email'] as String,
-      password: json['password'] as String
-      
-    );
-  }
+  const AuthEntity({
+    this.id,
+    required this.fname,
+    required this.lname,
+    this.image,
+    required this.phone,
+    required this.batch,
+    required this.courses,
+    required this.username,
+    required this.password,
+  });
 
-    Map<String, dynamic> toJson(){
-      return{
-        "id" : userId ,
-        "first_name": firstName,
-        "last_name": lastName,
-        "email": email,
-        "password": password
+  factory AuthEntity.fromJson(Map<String, dynamic> json) => AuthEntity(
+        id: json["id"],
+        fname: json["fname"],
+        lname: json["lname"],
+        image: json["image"],
+        phone: json["phone"],
+        batch: BatchEntity.fromJson(json["batch"]),
+        courses: List<CourseEntity>.from(
+            json["courses"].map((x) => CourseEntity.fromJson(x))),
+        username: json["username"],
+        password: json["password"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "fname": fname,
+        "lname": lname,
+        "image": image,
+        "phone": phone,
+        "batch": batch == null ? null : batch.toJson(),
+        "courses": List<dynamic>.from(courses.map((x) => x.toJson())),
+        "username": username,
+        "password": password,
       };
-    }
-
-    @override
-    String toString(){
-      return 'AuthEntity(userId: $userId, firstName: $firstName, lastName: $lastName, email: $email, password: $password)';
-    }
 }

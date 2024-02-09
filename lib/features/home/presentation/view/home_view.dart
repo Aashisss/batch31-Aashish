@@ -1,6 +1,11 @@
-import 'package:final_project/features/home/presentation/view_model/home_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_and_api_for_class/features/course/presentation/view/add_course_view.dart';
+import 'package:hive_and_api_for_class/features/home/presentation/view/bottom_view/dashboard_view.dart';
+import 'package:hive_and_api_for_class/features/home/presentation/view/bottom_view/profile_view.dart';
+import 'package:hive_and_api_for_class/features/map/presentation/view/google_map_view.dart';
+
+import '../../../batch/presentation/view/add_batch_view.dart';
 
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
@@ -10,13 +15,18 @@ class HomeView extends ConsumerStatefulWidget {
 }
 
 class _HomeViewState extends ConsumerState<HomeView> {
-
+  int selectedIndex = 0;
+  List<Widget> lstScreen = [
+    const DashboardView(),
+    const AddCourseView(),
+    const AddBatchView(),
+    const ProfileView(),
+    const GoogleMapView(),
+  ];
   @override
   Widget build(BuildContext context) {
-
-    final homeState = ref.watch(homeViewModelProvider);
     return Scaffold(
-      body: homeState.lstScreen[homeState.index],
+      body: lstScreen[selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
@@ -25,11 +35,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.book),
-            label: 'Favorite',
+            label: 'Products',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.batch_prediction),
-            label: 'Cart',
+            label: 'Notification',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -40,9 +50,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
             label: 'Location',
           ),
         ],
-        currentIndex: homeState.index,
+        currentIndex: selectedIndex,
         onTap: (index) {
-          ref.read(homeViewModelProvider.notifier).changeIndex(index);
+          setState(() {
+            selectedIndex = index;
+          });
         },
       ),
     );

@@ -1,35 +1,36 @@
 class AuthState {
   final bool isLoading;
   final String? error;
-  final bool showMessage;
+  final String? imageName;
 
   AuthState({
     required this.isLoading,
-    required this.error,
-    required this.showMessage,
+    this.error,
+    this.imageName,
   });
 
-  factory AuthState.initialState() => AuthState(
-        isLoading: false,
-        error: null,
-        showMessage: false,
-      );
+  factory AuthState.initial() {
+    return AuthState(
+      isLoading: false,
+      error: null,
+      imageName: null,
+    );
+  }
 
   AuthState copyWith({
     bool? isLoading,
     String? error,
-    bool? showMessage,
+    String? imageName,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
-      showMessage: showMessage ?? this.showMessage,
+      imageName: imageName ?? this.imageName,
     );
   }
 
-    @override
-  String toString() =>
-      'AuthState(isLoading: $isLoading, error: $error, showMessage: $showMessage)';
+  @override
+  String toString() => 'AuthState(isLoading: $isLoading, error: $error)';
 }
 
 

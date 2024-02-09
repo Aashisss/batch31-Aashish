@@ -1,37 +1,65 @@
-import 'package:final_project/core/common/snackbar/my_snackbar.dart';
-import 'package:final_project/features/auth/domain/entity/auth_entity.dart';
-import 'package:final_project/features/auth/presentation/view_model/auth_view_model.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_and_api_for_class/features/auth/domain/entity/auth_entity.dart';
+import 'package:hive_and_api_for_class/features/auth/presentation/viewmodel/auth_view_model.dart';
+import 'package:hive_and_api_for_class/features/batch/domain/entity/batch_entity.dart';
+import 'package:hive_and_api_for_class/features/batch/presentation/viewmodel/batch_view_model.dart';
+import 'package:hive_and_api_for_class/features/course/domain/entity/course_entity.dart';
+import 'package:hive_and_api_for_class/features/course/presentation/viewmodel/course_viewmodel.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class RegisterView extends ConsumerStatefulWidget {
   const RegisterView({super.key});
-
   @override
   ConsumerState<RegisterView> createState() => _RegisterViewState();
 }
 
 class _RegisterViewState extends ConsumerState<RegisterView> {
+  checkCameraPermission() async {
+    if (await Permission.camera.request().isRestricted ||
+        await Permission.camera.request().isDenied) {
+      await Permission.camera.request();
+    }
+  }
+
+  File? _img;
+  Future _browseImage(WidgetRef ref, ImageSource imageSource) async {
+    try {
+      final image = await ImagePicker().pickImage(source: imageSource);
+      if (image != null) {
+        setState(() {
+          _img = File(image.path);
+          ref.read(authViewModelProvider.notifier).uploadImage(_img!);
+        });
+      } else {
+        return;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  BatchEntity? _dropDownValue;
+  final List<CourseEntity> _lstCourseSelected = [];
+
   final _gap = const SizedBox(height: 8);
 
   final _key = GlobalKey<FormState>();
+
   final _fnameController = TextEditingController();
   final _lnameController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
 
   bool isObscure = true;
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authViewModelProvider);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (authState.showMessage) {
-        showSnackBar(message: "User Registered", context: context);
-        ref.read(authViewModelProvider.notifier).resetMessage(false);
-      }
-    });
+    final batchState = ref.watch(batchViewModelProvider);
+    final courseState = ref.watch(courseViewModelProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Register'),
@@ -45,18 +73,58 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
               key: _key,
               child: Column(
                 children: [
-                  const SizedBox(
-                    height: 200,
-                    width: 200,
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: AssetImage('assets/images/reg.png'),
-                      // backgroundImage: _img != null
-                      //     ? FileImage(_img!)
-                      //     : const AssetImage('assets/images/profile.png')
-                      //         as ImageProvider,
+                  InkWell(
+                    onTap: () {
+                      showModalBottomSheet(
+                        backgroundColor: Colors.grey[300],
+                        context: context,
+                        isScrollControlled: true,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(20),
+                          ),
+                        ),
+                        builder: (context) => Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  checkCameraPermission();
+                                  _browseImage(ref, ImageSource.camera);
+                                  Navigator.pop(context);
+                                  // Upload image it is not null
+                                },
+                                icon: const Icon(Icons.camera),
+                                label: const Text('Camera'),
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  _browseImage(ref, ImageSource.gallery);
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(Icons.image),
+                                label: const Text('Gallery'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                    child: SizedBox(
+                      height: 200,
+                      width: 200,
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: _img != null
+                            ? FileImage(_img!)
+                            : const AssetImage('assets/images/dhoni.jpg')
+                                as ImageProvider,
+                      ),
                     ),
                   ),
+                  const SizedBox(height: 25),
                   TextFormField(
                     controller: _fnameController,
                     decoration: const InputDecoration(
@@ -66,6 +134,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter first name';
                       }
+
                       return null;
                     }),
                   ),
@@ -84,26 +153,99 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                   ),
                   _gap,
                   TextFormField(
-                    controller: _emailController,
+                    controller: _phoneController,
                     decoration: const InputDecoration(
-                      labelText: 'Email',
+                      labelText: 'Phone No',
                     ),
                     validator: ((value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter email';
+                        return 'Please enter phoneNo';
                       }
                       return null;
                     }),
                   ),
                   _gap,
+                  if (batchState.isLoading) ...{
+                    const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  } else if (batchState.error != null) ...{
+                    Center(
+                      child: Text(batchState.error!),
+                    )
+                  } else ...{
+                    DropdownButtonFormField<BatchEntity>(
+                      items: batchState.batches
+                          .map((e) => DropdownMenuItem<BatchEntity>(
+                                value: e,
+                                child: Text(e.batchName),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        _dropDownValue = value;
+                      },
+                      value: _dropDownValue,
+                      decoration: const InputDecoration(
+                        labelText: 'Select Batch',
+                      ),
+                      validator: ((value) {
+                        if (value == null) {
+                          return 'Please select batch';
+                        }
+                        return null;
+                      }),
+                    ),
+                  },
+                  _gap,
+                  if (courseState.isLoading) ...{
+                    const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  } else if (courseState.error != null) ...{
+                    Center(
+                      child: Text(courseState.error!),
+                    )
+                  } else ...{
+                    MultiSelectDialogField(
+                      title: const Text('Select course'),
+                      items: courseState.courses
+                          .map(
+                            (course) => MultiSelectItem(
+                              course,
+                              course.courseName,
+                            ),
+                          )
+                          .toList(),
+                      listType: MultiSelectListType.CHIP,
+                      buttonText: const Text('Select course'),
+                      buttonIcon: const Icon(Icons.search),
+                      onConfirm: (values) {
+                        _lstCourseSelected.clear();
+                        _lstCourseSelected.addAll(values);
+                      },
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.grey,
+                        ),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      validator: ((value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select courses';
+                        }
+                        return null;
+                      }),
+                    ),
+                  },
+                  _gap,
                   TextFormField(
-                    controller: _confirmPasswordController,
+                    controller: _usernameController,
                     decoration: const InputDecoration(
-                      labelText: 'Password',
+                      labelText: 'Username',
                     ),
                     validator: ((value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter password';
+                        return 'Please enter username';
                       }
                       return null;
                     }),
@@ -113,7 +255,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                     controller: _passwordController,
                     obscureText: isObscure,
                     decoration: InputDecoration(
-                      labelText: 'Confirm Password',
+                      labelText: 'Password',
                       suffixIcon: IconButton(
                         icon: Icon(
                           isObscure ? Icons.visibility : Icons.visibility_off,
@@ -127,25 +269,56 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                     ),
                     validator: ((value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter confirm password';
+                        return 'Please enter password';
                       }
                       return null;
                     }),
                   ),
                   _gap,
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //     if (_key.currentState!.validate()) {
+                  //       var student = AuthEntity(
+                  //         fname: _fnameController.text,
+                  //         lname: _lnameController.text,
+                  //         image:
+                  //             ref.read(authViewModelProvider).imageName ?? '',
+                  //         phone: _phoneController.text,
+                  //         username: _usernameController.text,
+                  //         password: _passwordController.text,
+                  //         batch: _dropDownValue!,
+                  //         courses: _lstCourseSelected,
+                  //       );
+
+                  //       print(student);
+                  //       ref
+                  //           .read(authViewModelProvider.notifier)
+                  //           .registerStudent(context, student);
+                  //     }
+                  //   },
+                  //   child: const Text('Test'),
+                  // ),
                   ElevatedButton(
                     onPressed: () {
                       if (_key.currentState!.validate()) {
-                        AuthEntity user = AuthEntity(
-                            firstName: _fnameController.text,
-                            lastName: _lnameController.text,
-                            email: _emailController.text,
-                            password: _passwordController.text);
+                        var student = AuthEntity(
+                          fname: _fnameController.text,
+                          lname: _lnameController.text,
+                          image:
+                              ref.read(authViewModelProvider).imageName ?? '',
+                          phone: _phoneController.text,
+                          username: _usernameController.text,
+                          password: _passwordController.text,
+                          batch: _dropDownValue!,
+                          courses: _lstCourseSelected,
+                        );
 
-                        ref.read(authViewModelProvider.notifier).addUser(user);
+                        ref
+                            .read(authViewModelProvider.notifier)
+                            .registerStudent(context, student);
                       }
                     },
-                    child: const Text('SignUp'),
+                    child: const Text('Register'),
                   ),
                 ],
               ),
