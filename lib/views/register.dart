@@ -8,7 +8,7 @@ class Register extends StatefulWidget {
   @override
   State<Register> createState() => _RegisterState();
 }
-
+// function
 class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
