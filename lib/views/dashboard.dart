@@ -95,6 +95,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     _itemTapped(3); // Add your profile screen page index
                   },
                 ),
+                ///selected button
               ],
               selectedIndex: _selectedIndex,
               onTabChange: (index) {
