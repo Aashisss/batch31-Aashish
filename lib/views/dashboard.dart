@@ -8,7 +8,7 @@ import 'settings.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
-///function
+
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
 }
