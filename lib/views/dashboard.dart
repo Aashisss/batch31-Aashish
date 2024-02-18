@@ -26,7 +26,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   _itemTapped(int selectedIndex) {
     pageController.jumpToPage(selectedIndex);
   }
-
+/// classs
   @override
   Widget build(BuildContext context) {
     return Scaffold(
