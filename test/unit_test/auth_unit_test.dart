@@ -6,7 +6,7 @@ import 'package:hive_and_api_for_class/features/auth/domain/use_case/auth_usecas
 import 'package:hive_and_api_for_class/features/auth/presentation/viewmodel/auth_view_model.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-//updated
+
 import 'auth_unit_test.mocks.dart';
 import 'package:flutter_test/flutter_test.dart';
 
